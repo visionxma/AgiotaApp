@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "bolt-expo-nativewind",
+    "name": "Controle de Empréstimos",
     "slug": "bolt-expo-nativewind",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -29,6 +29,9 @@
       "eas": {
         "projectId": "a2efc216-cb9e-425d-8bf6-6cf01d47d428"
       }
+    },
+    "android": {
+      "package": "com.alexandrehenrico.boltexponativewind"
     }
   }
 }

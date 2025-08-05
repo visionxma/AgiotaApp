@@ -1,7 +1,26 @@
+import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
+import { router } from 'expo-router';
 import { Chrome as Home, Users, CirclePlus as PlusCircle, FileText } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function TabLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace('/auth/login');
+    }
+  }, [isAuthenticated, isLoading]);
+
+  if (isLoading) {
+    return null; // ou um componente de loading
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <Tabs
       screenOptions={{

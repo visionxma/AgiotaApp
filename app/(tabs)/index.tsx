@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { CirclePlus as PlusCircle, TrendingUp, TrendingDown, Users } from 'lucide-react-native';
+import { CirclePlus as PlusCircle, TrendingUp, TrendingDown, Users, LogOut } from 'lucide-react-native';
 import { Emprestimo, Devedor, ResumoFinanceiro } from '@/types';
 import { storage } from '@/utils/storage';
 import { calculations } from '@/utils/calculations';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { EmprestimoCard } from '@/components/EmprestimoCard';
 
 export default function Dashboard() {
+  const { user, logout } = useAuth();
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
   const [devedores, setDevedores] = useState<Devedor[]>([]);
   const [resumo, setResumo] = useState<ResumoFinanceiro>({
@@ -92,8 +94,15 @@ export default function Dashboard() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Dashboard</Text>
-        <Text style={styles.subtitle}>Controle de Empréstimos</Text>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.title}>Dashboard</Text>
+            <Text style={styles.subtitle}>Olá, {user?.name || 'Usuário'}</Text>
+          </View>
+          <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+            <LogOut size={24} color="#ffffff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView 
@@ -200,6 +209,14 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 24,
     paddingHorizontal: 16,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  logoutButton: {
+    padding: 8,
   },
   title: {
     fontSize: 28,

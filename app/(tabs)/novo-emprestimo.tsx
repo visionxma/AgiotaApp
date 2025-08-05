@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
+import RNPickerSelect from 'react-native-picker-select';
+import { ChevronDown } from 'lucide-react-native';
 import uuid from 'react-native-uuid';
 import dayjs from 'dayjs';
 import { Devedor, Emprestimo, HistoricoItem } from '@/types';
@@ -113,6 +114,12 @@ export default function NovoEmprestimo() {
     }
   };
 
+  // Preparar dados para o picker
+  const pickerItems = devedores.map(devedor => ({
+    label: devedor.nome,
+    value: devedor.id,
+  }));
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -127,20 +134,23 @@ export default function NovoEmprestimo() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Devedor</Text>
             <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={devedorSelecionado}
+              <RNPickerSelect
                 onValueChange={setDevedorSelecionado}
-                style={styles.picker}
-              >
-                <Picker.Item label="Selecione um devedor..." value="" />
-                {devedores.map(devedor => (
-                  <Picker.Item
-                    key={devedor.id}
-                    label={devedor.nome}
-                    value={devedor.id}
-                  />
-                ))}
-              </Picker>
+                items={pickerItems}
+                value={devedorSelecionado}
+                placeholder={{
+                  label: 'Selecione um devedor...',
+                  value: '',
+                  color: '#9CA3AF',
+                }}
+                style={pickerSelectStyles}
+                useNativeAndroidPickerStyle={false}
+                Icon={() => (
+                  <View style={styles.iconContainer}>
+                    <ChevronDown size={20} color="#6B7280" />
+                  </View>
+                )}
+              />
             </View>
           </View>
 
@@ -236,6 +246,8 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginVertical: 8,
+    zIndex: 1000,
+    elevation: 1000,
   },
   inputLabel: {
     fontSize: 14,
@@ -248,13 +260,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 8,
+    position: 'relative',
+    zIndex: 1000,
+    elevation: 1000,
   },
-  picker: {
-    height: 50,
+  iconContainer: {
+    position: 'absolute',
+    right: 12,
+    top: 15,
+    zIndex: 1001,
+    elevation: 1001,
   },
   buttonContainer: {
     marginTop: 24,
     gap: 12,
+    zIndex: 1,
+    elevation: 1,
   },
   alertContainer: {
     alignItems: 'center',
@@ -270,5 +291,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
     textAlign: 'center',
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    paddingRight: 30,
+    color: '#111827',
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    minHeight: 50,
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    paddingRight: 30,
+    color: '#111827',
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    minHeight: 50,
+  },
+  placeholder: {
+    color: '#9CA3AF',
+    fontSize: 16,
   },
 });
