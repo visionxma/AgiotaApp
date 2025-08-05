@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthState, User, LoginCredentials, RegisterData } from '@/types/auth';
 import { authService } from '@/utils/auth';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/utils/firebase';
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; message: string }>;
@@ -26,13 +28,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuthState = async () => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true }));
-      const user = await authService.getCurrentUser();
       
-      setAuthState({
-        isAuthenticated: !!user,
-        user,
-        isLoading: false,
+      // Use Firebase onAuthStateChanged for real-time auth state
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          const user = await authService.convertFirebaseUser(firebaseUser);
+          setAuthState({
+            isAuthenticated: true,
+            user,
+            isLoading: false,
+          });
+        } else {
+          setAuthState({
+            isAuthenticated: false,
+            user: null,
+            isLoading: false,
+          });
+        }
       });
+      
+      // Return unsubscribe function for cleanup
+      return unsubscribe;
     } catch (error) {
       console.error('Erro ao verificar estado de autenticação:', error);
       setAuthState({
@@ -117,7 +133,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
-    checkAuthState();
+    const unsubscribe = checkAuthState();
+    // Cleanup subscription on unmount
+    return () => unsubscribe?.then(unsub => unsub?.());
   }, []);
 
   const value: AuthContextType = {

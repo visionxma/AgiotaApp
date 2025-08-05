@@ -60,9 +60,7 @@ export default function DetalhesDevedor() {
           style: 'destructive',
           onPress: async () => {
             try {
-              const devedores = await storage.getDevedores();
-              const devedoresAtualizados = devedores.filter(d => d.id !== devedor.id);
-              await storage.saveDevedores(devedoresAtualizados);
+              await storage.deleteDevedor(devedor.id);
               
               Alert.alert(
                 'Sucesso',

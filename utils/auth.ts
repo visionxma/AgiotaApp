@@ -1,32 +1,20 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import CryptoJS from 'react-native-crypto-js';
+import { 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  updateProfile,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, db } from './firebase';
 import { User, LoginCredentials, RegisterData } from '@/types/auth';
-import uuid from 'react-native-uuid';
-import dayjs from 'dayjs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const USERS_KEY = '@users';
-const CURRENT_USER_KEY = '@current_user';
 const REMEMBER_ME_KEY = '@remember_me';
 
-// Chave para criptografia (em produção, use uma chave mais segura)
-const ENCRYPTION_KEY = 'loan_app_secret_key_2024';
-
 export const authService = {
-  /**
-   * Criptografa a senha usando AES
-   */
-  encryptPassword(password: string): string {
-    return CryptoJS.AES.encrypt(password, ENCRYPTION_KEY).toString();
-  },
-
-  /**
-   * Descriptografa a senha
-   */
-  decryptPassword(encryptedPassword: string): string {
-    const bytes = CryptoJS.AES.decrypt(encryptedPassword, ENCRYPTION_KEY);
-    return bytes.toString(CryptoJS.enc.Utf8);
-  },
-
   /**
    * Valida formato de email
    */
@@ -52,28 +40,20 @@ export const authService = {
   },
 
   /**
-   * Busca todos os usuários
+   * Converte FirebaseUser para User
    */
-  async getUsers(): Promise<User[]> {
-    try {
-      const data = await AsyncStorage.getItem(USERS_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
-      return [];
-    }
-  },
-
-  /**
-   * Salva lista de usuários
-   */
-  async saveUsers(users: User[]): Promise<void> {
-    try {
-      await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
-    } catch (error) {
-      console.error('Erro ao salvar usuários:', error);
-      throw new Error('Falha ao salvar dados do usuário');
-    }
+  async convertFirebaseUser(firebaseUser: FirebaseUser): Promise<User> {
+    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+    const userData = userDoc.data();
+    
+    return {
+      id: firebaseUser.uid,
+      email: firebaseUser.email || '',
+      name: firebaseUser.displayName || userData?.name || '',
+      password: '', // Não armazenamos senha no cliente
+      createdAt: userData?.createdAt || new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+    };
   },
 
   /**
@@ -101,31 +81,38 @@ export const authService = {
         return { success: false, message: 'Senhas não coincidem' };
       }
 
-      // Verifica se usuário já existe
-      const users = await this.getUsers();
-      const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
-      if (existingUser) {
-        return { success: false, message: 'Email já cadastrado' };
-      }
+      // Cria usuário no Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
 
-      // Cria novo usuário
-      const newUser: User = {
-        id: uuid.v4() as string,
+      // Atualiza o perfil com o nome
+      await updateProfile(firebaseUser, {
+        displayName: name
+      });
+
+      // Salva dados adicionais no Firestore
+      await setDoc(doc(db, 'users', firebaseUser.uid), {
         name: name.trim(),
         email: email.toLowerCase().trim(),
-        password: this.encryptPassword(password),
-        createdAt: dayjs().toISOString(),
-      };
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+      });
 
-      // Salva usuário
-      users.push(newUser);
-      await this.saveUsers(users);
-
-      return { success: true, message: 'Usuário cadastrado com sucesso!', user: newUser };
-    } catch (error) {
+      const user = await this.convertFirebaseUser(firebaseUser);
+      return { success: true, message: 'Usuário cadastrado com sucesso!', user };
+    } catch (error: any) {
       console.error('Erro no registro:', error);
-      return { success: false, message: 'Erro interno. Tente novamente.' };
+      
+      let message = 'Erro interno. Tente novamente.';
+      if (error.code === 'auth/email-already-in-use') {
+        message = 'Email já cadastrado';
+      } else if (error.code === 'auth/weak-password') {
+        message = 'Senha muito fraca';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Email inválido';
+      }
+      
+      return { success: false, message };
     }
   },
 
@@ -141,27 +128,14 @@ export const authService = {
         return { success: false, message: 'Email e senha são obrigatórios' };
       }
 
-      // Busca usuário
-      const users = await this.getUsers();
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim());
+      // Faz login no Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
 
-      if (!user) {
-        return { success: false, message: 'Email não encontrado' };
-      }
-
-      // Verifica senha
-      const decryptedPassword = this.decryptPassword(user.password);
-      if (decryptedPassword !== password) {
-        return { success: false, message: 'Senha incorreta' };
-      }
-
-      // Atualiza último login
-      const updatedUser = { ...user, lastLogin: dayjs().toISOString() };
-      const updatedUsers = users.map(u => u.id === user.id ? updatedUser : u);
-      await this.saveUsers(updatedUsers);
-
-      // Salva usuário atual
-      await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+      // Atualiza último login no Firestore
+      await setDoc(doc(db, 'users', firebaseUser.uid), {
+        lastLogin: new Date().toISOString(),
+      }, { merge: true });
 
       // Salva preferência "Lembrar-me"
       if (rememberMe) {
@@ -170,10 +144,25 @@ export const authService = {
         await AsyncStorage.removeItem(REMEMBER_ME_KEY);
       }
 
-      return { success: true, message: 'Login realizado com sucesso!', user: updatedUser };
-    } catch (error) {
+      const user = await this.convertFirebaseUser(firebaseUser);
+      return { success: true, message: 'Login realizado com sucesso!', user };
+    } catch (error: any) {
       console.error('Erro no login:', error);
-      return { success: false, message: 'Erro interno. Tente novamente.' };
+      
+      let message = 'Erro interno. Tente novamente.';
+      if (error.code === 'auth/user-not-found') {
+        message = 'Email não encontrado';
+      } else if (error.code === 'auth/wrong-password') {
+        message = 'Senha incorreta';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Email inválido';
+      } else if (error.code === 'auth/user-disabled') {
+        message = 'Conta desabilitada';
+      } else if (error.code === 'auth/too-many-requests') {
+        message = 'Muitas tentativas. Tente novamente mais tarde';
+      }
+      
+      return { success: false, message };
     }
   },
 
@@ -182,7 +171,7 @@ export const authService = {
    */
   async logout(): Promise<void> {
     try {
-      await AsyncStorage.removeItem(CURRENT_USER_KEY);
+      await signOut(auth);
     } catch (error) {
       console.error('Erro no logout:', error);
     }
@@ -193,8 +182,17 @@ export const authService = {
    */
   async getCurrentUser(): Promise<User | null> {
     try {
-      const data = await AsyncStorage.getItem(CURRENT_USER_KEY);
-      return data ? JSON.parse(data) : null;
+      return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+          unsubscribe();
+          if (firebaseUser) {
+            const user = await this.convertFirebaseUser(firebaseUser);
+            resolve(user);
+          } else {
+            resolve(null);
+          }
+        });
+      });
     } catch (error) {
       console.error('Erro ao buscar usuário atual:', error);
       return null;
@@ -215,7 +213,7 @@ export const authService = {
   },
 
   /**
-   * Simula recuperação de senha (em produção, enviaria email)
+   * Envia email de recuperação de senha
    */
   async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
     try {
@@ -223,21 +221,36 @@ export const authService = {
         return { success: false, message: 'Email inválido' };
       }
 
-      const users = await this.getUsers();
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim());
-
-      if (!user) {
-        return { success: false, message: 'Email não encontrado' };
-      }
-
-      // Em produção, aqui enviaria um email com link de recuperação
+      await sendPasswordResetEmail(auth, email);
       return { 
         success: true, 
-        message: 'Instruções de recuperação foram enviadas para seu email (funcionalidade simulada)' 
+        message: 'Email de recuperação enviado com sucesso! Verifique sua caixa de entrada.' 
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro na recuperação de senha:', error);
-      return { success: false, message: 'Erro interno. Tente novamente.' };
+      
+      let message = 'Erro interno. Tente novamente.';
+      if (error.code === 'auth/user-not-found') {
+        message = 'Email não encontrado';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Email inválido';
+      }
+      
+      return { success: false, message };
     }
+  },
+
+  /**
+   * Observa mudanças no estado de autenticação
+   */
+  onAuthStateChanged(callback: (user: User | null) => void) {
+    return onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const user = await this.convertFirebaseUser(firebaseUser);
+        callback(user);
+      } else {
+        callback(null);
+      }
+    });
   }
 };
