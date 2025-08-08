@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Expo Dev Client (Android)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/expo",
+      "args": ["start", "--dev-client", "--android"],
+      "console": "integratedTerminal",
+      "env": {
+        "EXPO_NO_TELEMETRY": "1"
+      }
+    },
+    {
+      "name": "Expo Dev Client (iOS)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/expo",
+      "args": ["start", "--dev-client", "--ios"],
+      "console": "integratedTerminal",
+      "env": {
+        "EXPO_NO_TELEMETRY": "1"
+      }
+    },
+    {
+      "name": "Expo Web",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/expo",
+      "args": ["start", "--web"],
+      "console": "integratedTerminal",
+      "env": {
+        "EXPO_NO_TELEMETRY": "1"
+      }
+    }
+  ]
+}

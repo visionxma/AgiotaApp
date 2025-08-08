@@ -140,15 +140,34 @@ O aplicativo funciona completamente offline:
 npm install
 ```
 
-2. Configure o Firebase:
+2. Instale o EAS CLI globalmente:
+```bash
+npm install -g @expo/cli eas-cli
+```
+
+3. Configure o Firebase:
    - Adicione o arquivo `google-services.json` em `android/app/`
    - Configure as regras de segurança do Firestore
 
-3. Execute o projeto:
+4. Execute o projeto:
+
+### Para desenvolvimento no VS Code:
 ```bash
-npm run android  # Para Android
-npm run ios      # Para iOS
-npm run dev      # Para desenvolvimento web
+npm run dev          # Inicia o dev client
+npm run start:web    # Para desenvolvimento web
+```
+
+### Para builds nativos:
+```bash
+npm run build:dev    # Build de desenvolvimento
+npm run android      # Build e executa no Android
+npm run ios          # Build e executa no iOS
+```
+
+### Comandos úteis:
+```bash
+npm run prebuild     # Regenera arquivos nativos
+npx expo doctor      # Verifica problemas na configuração
 ```
 
 ## 📋 Regras de Segurança do Firestore

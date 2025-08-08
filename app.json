@@ -10,9 +10,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.alexandrehenrico.boltexponativewind",
       "runtimeVersion": {
         "policy": "appVersion"
       }
+    },
+    "android": {
+      "package": "com.alexandrehenrico.boltexponativewind",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "bundler": "metro",
@@ -23,6 +28,7 @@
       "expo-router",
       "expo-font",
       "expo-web-browser",
+      "expo-dev-client",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
       "@react-native-firebase/firestore"
@@ -35,10 +41,6 @@
       "eas": {
         "projectId": "a2efc216-cb9e-425d-8bf6-6cf01d47d428"
       }
-    },
-    "android": {
-      "package": "com.alexandrehenrico.boltexponativewind",
-      "runtimeVersion": "1.0.0"
     },
     "updates": {
       "url": "https://u.expo.dev/a2efc216-cb9e-425d-8bf6-6cf01d47d428"
