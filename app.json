@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -31,7 +34,11 @@
       }
     },
     "android": {
-      "package": "com.alexandrehenrico.boltexponativewind"
+      "package": "com.alexandrehenrico.boltexponativewind",
+      "runtimeVersion": "1.0.0"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a2efc216-cb9e-425d-8bf6-6cf01d47d428"
     }
   }
 }
