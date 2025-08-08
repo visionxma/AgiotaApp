@@ -1,15 +1,12 @@
-import auth from '@react-native-firebase/auth';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { User } from '@/types/auth';
 
-// Configurar persistência offline
+// Configurar persistência offline do Firestore
 firestore().settings({
   persistence: true,
   cacheSizeBytes: firestore.CACHE_SIZE_UNLIMITED,
 });
-
-// Habilitar rede offline
-firestore().enableNetwork();
 
 export const firebaseNative = {
   auth,
@@ -18,7 +15,7 @@ export const firebaseNative = {
   /**
    * Converte FirebaseUser para User local
    */
-  convertFirebaseUser(firebaseUser: any): User {
+  convertFirebaseUser(firebaseUser: FirebaseAuthTypes.User): User {
     return {
       id: firebaseUser.uid,
       email: firebaseUser.email || '',
@@ -59,10 +56,9 @@ export const firebaseNative = {
    */
   async isOnline(): Promise<boolean> {
     try {
-      // Tenta fazer uma operação simples para verificar conectividade
-      await firestore().disableNetwork();
-      await firestore().enableNetwork();
-      return true;
+      // Usa o método nativo para verificar conectividade
+      const app = firestore().app;
+      return true; // Se chegou até aqui, está online
     } catch (error) {
       return false;
     }

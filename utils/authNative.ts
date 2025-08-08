@@ -1,4 +1,4 @@
-import auth from '@react-native-firebase/auth';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, LoginCredentials, RegisterData } from '@/types/auth';
@@ -145,6 +145,8 @@ export const authNative = {
         message = 'Muitas tentativas. Tente novamente mais tarde';
       } else if (error.code === 'auth/network-request-failed') {
         message = 'Erro de conexão. Verifique sua internet.';
+      } else if (error.code === 'auth/invalid-credential') {
+        message = 'Credenciais inválidas';
       }
       
       return { success: false, message };
@@ -233,5 +235,16 @@ export const authNative = {
         callback(null);
       }
     });
+  },
+
+  /**
+   * Converte FirebaseUser para User local (compatibilidade)
+   */
+  convertFirebaseUser(firebaseUser: FirebaseAuthTypes.User): User {
+    return firebaseNative.convertFirebaseUser(firebaseUser);
   }
 };
+
+// Export para compatibilidade
+export const authService = authNative;
+export default authNative;

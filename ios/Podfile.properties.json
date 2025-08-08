@@ -1,0 +1,8 @@
+{
+  "expo.jsEngine": "hermes",
+  "ios.deploymentTarget": "13.4",
+  "ios.useFrameworks": "static",
+  "apple.ccacheEnabled": "true",
+  "newArchEnabled": "true",
+  "EX_DEV_CLIENT_NETWORK_INSPECTOR": "true"
+}

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { useAuth } from '@/contexts/AuthContext';
-import { storageNative } from '@/utils/storageNative';
 
 export function SyncIndicator() {
   const { syncData } = useAuth();
@@ -10,20 +10,14 @@ export function SyncIndicator() {
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    checkOnlineStatus();
-    const interval = setInterval(checkOnlineStatus, 30000); // Verifica a cada 30 segundos
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  const checkOnlineStatus = async () => {
-    try {
-      const online = await storageNative.isOnline();
+    // Listener para mudanças de conectividade
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const online = state.isConnected === true && state.isInternetReachable === true;
       setIsOnline(online);
-    } catch (error) {
-      setIsOnline(false);
-    }
-  };
+    });
+
+    return unsubscribe;
+  }, []);
 
   const handleSync = async () => {
     if (!isOnline || isSyncing) return;

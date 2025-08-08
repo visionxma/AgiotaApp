@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "289015782913",
+    "project_id": "appagiota",
+    "storage_bucket": "appagiota.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:289015782913:android:14fc1e12eccebb7bc36a00",
+        "android_client_info": {
+          "package_name": "com.alexandrehenrico.boltexponativewind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCO-z72ZuDMtQrhPeCql_tnTZKw8yN9ZWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

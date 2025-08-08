@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { WifiOff } from 'lucide-react-native';
-import { storageNative } from '@/utils/storageNative';
+import NetInfo from '@react-native-community/netinfo';
 
 export function OfflineNotice() {
   const [isOnline, setIsOnline] = useState(true);
   const [slideAnim] = useState(new Animated.Value(-100));
 
   useEffect(() => {
-    checkOnlineStatus();
-    const interval = setInterval(checkOnlineStatus, 10000); // Verifica a cada 10 segundos
-    
-    return () => clearInterval(interval);
+    // Listener para mudanças de conectividade
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const online = state.isConnected === true && state.isInternetReachable === true;
+      setIsOnline(online);
+    });
+
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -31,15 +34,6 @@ export function OfflineNotice() {
       }).start();
     }
   }, [isOnline]);
-
-  const checkOnlineStatus = async () => {
-    try {
-      const online = await storageNative.isOnline();
-      setIsOnline(online);
-    } catch (error) {
-      setIsOnline(false);
-    }
-  };
 
   return (
     <Animated.View 

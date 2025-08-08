@@ -1,6 +1,7 @@
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import { Devedor, Emprestimo } from '@/types';
 
 // Chaves para cache local
@@ -27,10 +28,10 @@ export const storageNative = {
    */
   async isOnline(): Promise<boolean> {
     try {
-      // Tenta fazer uma operação simples para verificar conectividade
-      await firestore().app.utils().isNetworkEnabled;
-      return true;
+      const netInfo = await NetInfo.fetch();
+      return netInfo.isConnected === true && netInfo.isInternetReachable === true;
     } catch (error) {
+      console.error('Erro ao verificar conectividade:', error);
       return false;
     }
   },
@@ -530,3 +531,7 @@ export const storageNative = {
     console.warn('saveEmprestimos é deprecated. Use addEmprestimo ou updateEmprestimo.');
   },
 };
+
+// Export para compatibilidade
+export const storage = storageNative;
+export default storageNative;

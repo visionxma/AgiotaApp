@@ -13,11 +13,13 @@
       "bundleIdentifier": "com.alexandrehenrico.boltexponativewind",
       "runtimeVersion": {
         "policy": "appVersion"
-      }
+      },
+      "googleServicesFile": "./ios/GoogleService-Info.plist"
     },
     "android": {
       "package": "com.alexandrehenrico.boltexponativewind",
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": "1.0.0",
+      "googleServicesFile": "./android/app/google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -28,10 +30,7 @@
       "expo-router",
       "expo-font",
       "expo-web-browser",
-      "expo-dev-client",
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
-      "@react-native-firebase/firestore"
+      "expo-dev-client"
     ],
     "experiments": {
       "typedRoutes": true
