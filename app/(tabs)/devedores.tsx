@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } 
 import { router, useFocusEffect } from 'expo-router';
 import { CirclePlus as PlusCircle, Phone, FileText } from 'lucide-react-native';
 import { Devedor } from '@/types';
-import { storage } from '@/utils/storage';
+import { storage } from '@/utils/storageNative';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 

@@ -5,7 +5,7 @@ import { ArrowLeft, Plus, DollarSign, Calendar, History } from 'lucide-react-nat
 import uuid from 'react-native-uuid';
 import dayjs from 'dayjs';
 import { Emprestimo, Devedor, HistoricoItem } from '@/types';
-import { storage } from '@/utils/storage';
+import { storage } from '@/utils/storageNative';
 import { calculations } from '@/utils/calculations';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';

@@ -3,12 +3,13 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } 
 import { router, useFocusEffect } from 'expo-router';
 import { CirclePlus as PlusCircle, TrendingUp, TrendingDown, Users, LogOut } from 'lucide-react-native';
 import { Emprestimo, Devedor, ResumoFinanceiro } from '@/types';
-import { storage } from '@/utils/storage';
+import { storage } from '@/utils/storageNative';
 import { calculations } from '@/utils/calculations';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { EmprestimoCard } from '@/components/EmprestimoCard';
+import { SyncIndicator } from '@/components/SyncIndicator';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -99,9 +100,12 @@ export default function Dashboard() {
             <Text style={styles.title}>Dashboard</Text>
             <Text style={styles.subtitle}>Olá, {user?.name || 'Usuário'}</Text>
           </View>
-          <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-            <LogOut size={24} color="#ffffff" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <SyncIndicator />
+            <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+              <LogOut size={24} color="#ffffff" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -214,6 +218,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   logoutButton: {
     padding: 8,

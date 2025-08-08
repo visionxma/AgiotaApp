@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import uuid from 'react-native-uuid';
 import dayjs from 'dayjs';
 import { Devedor } from '@/types';
-import { storage } from '@/utils/storage';
+import { storage } from '@/utils/storageNative';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';

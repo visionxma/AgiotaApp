@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Phone, FileText, CreditCard as Edit, Trash2 } from 'lucide-react-native';
 import dayjs from 'dayjs';
 import { Devedor, Emprestimo } from '@/types';
-import { storage } from '@/utils/storage';
+import { storage } from '@/utils/storageNative';
 import { calculations } from '@/utils/calculations';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';

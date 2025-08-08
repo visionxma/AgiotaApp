@@ -6,7 +6,7 @@ import { ChevronDown } from 'lucide-react-native';
 import uuid from 'react-native-uuid';
 import dayjs from 'dayjs';
 import { Devedor, Emprestimo, HistoricoItem } from '@/types';
-import { storage } from '@/utils/storage';
+import { storage } from '@/utils/storageNative';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';

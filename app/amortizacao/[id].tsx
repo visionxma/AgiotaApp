@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import uuid from 'react-native-uuid';
 import dayjs from 'dayjs';
 import { Emprestimo, Devedor, HistoricoItem } from '@/types';
-import { storage } from '@/utils/storage';
+import { storage } from '@/utils/storageNative';
 import { calculations } from '@/utils/calculations';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';

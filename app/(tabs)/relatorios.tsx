@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native
 import { useFocusEffect } from 'expo-router';
 import { TrendingUp, TrendingDown, Users, Calendar } from 'lucide-react-native';
 import { Emprestimo, Devedor } from '@/types';
-import { storage } from '@/utils/storage';
+import { storage } from '@/utils/storageNative';
 import { calculations } from '@/utils/calculations';
 import { Card } from '@/components/Card';
 

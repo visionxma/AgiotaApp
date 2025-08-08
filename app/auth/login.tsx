@@ -13,7 +13,7 @@ import {
 import { router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock, LogIn } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
-import { authService } from '@/utils/auth';
+import { authService } from '@/utils/authNative';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
