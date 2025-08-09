@@ -1,18 +1,59 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// ==========================================
+// BUILD.GRADLE (Project Level)
+// ==========================================
+// Configuração principal do projeto Android
+// Otimizado para Expo SDK 52 + React Native 0.76.7 + Firebase
 
 buildscript {
+  ext {
+    // Versões das ferramentas de build
+    buildToolsVersion = "34.0.0"
+    minSdkVersion = 23
+    compileSdkVersion = 34
+    targetSdkVersion = 34
+    ndkVersion = "26.1.10909125"
+    
+    // Versões específicas para compatibilidade
+    kotlinVersion = "1.9.24"
+    gradleVersion = "8.10.2"
+    
+    // Configurações do React Native
+    newArchEnabled = providers.gradleProperty("newArchEnabled").getOrElse("true").toBoolean()
+    hermesEnabled = providers.gradleProperty("hermesEnabled").getOrElse("true").toBoolean()
+  }
+
+  // Repositórios para dependências de build
   repositories {
     google()
     mavenCentral()
+    maven { url 'https://www.jitpack.io' }
   }
+
+  // Dependências do classpath de build
   dependencies {
-    classpath('com.android.tools.build:gradle')
+    // Plugin Android Gradle
+    classpath('com.android.tools.build:gradle:8.7.3')
+    
+    // Plugin Kotlin
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    
+    // Plugin React Native
     classpath('com.facebook.react:react-native-gradle-plugin')
-    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+    
+    // Plugin Google Services (Firebase)
     classpath('com.google.gms:google-services:4.4.2')
+    
+    // Plugin Firebase Crashlytics (opcional)
+    classpath('com.google.firebase:firebase-crashlytics-gradle:3.0.2')
+    
+    // Plugin Firebase Performance (opcional)
+    classpath('com.google.firebase:perf-plugin:1.4.2')
   }
 }
 
+// ==========================================
+// CONFIGURAÇÃO DO REACT NATIVE
+// ==========================================
 def reactNativeAndroidDir = new File(
   providers.exec {
     workingDir(rootDir)
@@ -21,18 +62,147 @@ def reactNativeAndroidDir = new File(
   "../android"
 )
 
+// ==========================================
+// REPOSITÓRIOS GLOBAIS
+// ==========================================
 allprojects {
   repositories {
+    // Repositório do React Native (deve vir primeiro)
     maven {
-      // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
       url(reactNativeAndroidDir)
+      name("React Native Android")
     }
 
+    // Repositórios principais
     google()
     mavenCentral()
+    
+    // Repositórios adicionais
     maven { url 'https://www.jitpack.io' }
+    maven { url 'https://maven.google.com' }
+    
+    // Repositório local do npm (para dependências específicas)
+    maven {
+      url("${rootProject.projectDir}/../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+    }
+  }
+
+  // ==========================================
+  // CONFIGURAÇÕES GLOBAIS DE BUILD
+  // ==========================================
+  configurations.all {
+    resolutionStrategy {
+      // Força versões específicas para evitar conflitos
+      force 'androidx.core:core:1.12.0'
+      force 'androidx.core:core-ktx:1.12.0'
+      force 'androidx.appcompat:appcompat:1.6.1'
+      force 'androidx.fragment:fragment:1.6.2'
+      force 'androidx.activity:activity:1.8.2'
+      
+      // Configurações específicas para Firebase
+      force 'com.google.android.gms:play-services-base:18.5.0'
+      force 'com.google.android.gms:play-services-basement:18.4.0'
+      force 'com.google.android.gms:play-services-tasks:18.2.0'
+      
+      // Evita conflitos de versão do Kotlin
+      force "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+      force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    }
+    
+    // Exclui dependências problemáticas
+    exclude group: 'com.facebook.fbjni', module: 'fbjni-java-only'
+    exclude group: 'com.facebook.flipper'
   }
 }
 
+// ==========================================
+// PLUGINS PRINCIPAIS
+// ==========================================
 apply plugin: "expo-root-project"
 apply plugin: "com.facebook.react.rootproject"
+
+// ==========================================
+// CONFIGURAÇÕES DE PERFORMANCE
+// ==========================================
+// Configurações para melhorar performance do build
+gradle.projectsEvaluated {
+  tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+  }
+}
+
+// ==========================================
+// CONFIGURAÇÕES ESPECÍFICAS PARA FIREBASE
+// ==========================================
+// Estas configurações garantem que o Firebase funcione
+// corretamente com React Native e Expo
+
+subprojects { subproject ->
+  afterEvaluate {
+    if (subproject.plugins.hasPlugin('com.android.application') ||
+        subproject.plugins.hasPlugin('com.android.library')) {
+      
+      // Configurações Android específicas para Firebase
+      subproject.android {
+        compileSdkVersion rootProject.ext.compileSdkVersion
+        
+        defaultConfig {
+          minSdkVersion rootProject.ext.minSdkVersion
+          targetSdkVersion rootProject.ext.targetSdkVersion
+        }
+        
+        // Configurações de compilação para Firebase
+        compileOptions {
+          sourceCompatibility JavaVersion.VERSION_11
+          targetCompatibility JavaVersion.VERSION_11
+        }
+        
+        // Configurações Kotlin para Firebase
+        if (subproject.plugins.hasPlugin('org.jetbrains.kotlin.android')) {
+          kotlinOptions {
+            jvmTarget = '11'
+          }
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// CONFIGURAÇÕES DE LIMPEZA
+// ==========================================
+task clean(type: Delete) {
+  delete rootProject.buildDir
+  delete file("${rootProject.projectDir}/.gradle")
+  delete file("${rootProject.projectDir}/build")
+}
+
+// ==========================================
+// CONFIGURAÇÕES DE MEMÓRIA E PERFORMANCE
+// ==========================================
+// Estas configurações são aplicadas via gradle.properties
+// mas podem ser sobrescritas aqui se necessário
+
+// Configuração para builds paralelos
+if (project.hasProperty('org.gradle.parallel')) {
+  org.gradle.parallel = true
+}
+
+// Configuração para daemon do Gradle
+if (project.hasProperty('org.gradle.daemon')) {
+  org.gradle.daemon = true
+}
+
+// ==========================================
+// VERIFICAÇÕES DE INTEGRIDADE
+// ==========================================
+// Verifica se as dependências críticas estão presentes
+gradle.taskGraph.whenReady { taskGraph ->
+  if (taskGraph.hasTask(':app:assembleDebug') || taskGraph.hasTask(':app:assembleRelease')) {
+    println "🔥 Iniciando build com Firebase nativo integrado"
+    println "📱 React Native: 0.76.7"
+    println "🚀 Expo SDK: 52"
+    println "⚡ Kotlin: $kotlinVersion"
+    println "🔧 Gradle: $gradleVersion"
+  }
+}

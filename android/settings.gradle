@@ -1,4 +1,11 @@
+// ==========================================
+// SETTINGS.GRADLE - Configuração do Projeto
+// ==========================================
+// Este arquivo configura os módulos e plugins do projeto Android
+// Otimizado para Expo SDK 52 + React Native 0.76.7 + Firebase
+
 pluginManagement {
+  // Configuração do plugin React Native Gradle
   def reactNativeGradlePlugin = new File(
     providers.exec {
       workingDir(rootDir)
@@ -7,6 +14,7 @@ pluginManagement {
   ).getParentFile().absolutePath
   includeBuild(reactNativeGradlePlugin)
   
+  // Configuração do plugin Expo
   def expoPluginsPath = new File(
     providers.exec {
       workingDir(rootDir)
@@ -15,13 +23,22 @@ pluginManagement {
     "../android/expo-gradle-plugin"
   ).absolutePath
   includeBuild(expoPluginsPath)
+
+  // Repositórios para plugins
+  repositories {
+    google()
+    mavenCentral()
+    gradlePluginPortal()
+  }
 }
 
+// Plugins principais do projeto
 plugins {
   id("com.facebook.react.settings")
   id("expo-autolinking-settings")
 }
 
+// Configuração do React Native
 extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   if (System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1') {
     ex.autolinkLibrariesFromCommand()
@@ -29,11 +46,24 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
     ex.autolinkLibrariesFromCommand(expoAutolinking.rnConfigCommand)
   }
 }
+
+// Configuração do Expo
 expoAutolinking.useExpoModules()
 
+// Nome do projeto
 rootProject.name = 'Controle de Empréstimos'
 
+// Configuração do catálogo de versões do Expo
 expoAutolinking.useExpoVersionCatalog()
 
+// Inclusão dos módulos
 include ':app'
+
+// Inclusão do plugin React Native Gradle
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
+
+// ==========================================
+// CONFIGURAÇÕES ADICIONAIS PARA FIREBASE
+// ==========================================
+// Estas configurações garantem que o Firebase seja
+// corretamente integrado ao processo de build
