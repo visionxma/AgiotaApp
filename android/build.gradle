@@ -2,7 +2,7 @@
 // BUILD.GRADLE (Project Level)
 // ==========================================
 // Configuração principal do projeto Android
-// Otimizado para Expo SDK 52 + React Native 0.76.7 + Firebase
+// Otimizado para Expo SDK 52 + React Native 0.79.1 + Firebase
 
 buildscript {
   ext {
@@ -14,7 +14,7 @@ buildscript {
     ndkVersion = "26.1.10909125"
     
     // Versões específicas para compatibilidade
-    kotlinVersion = "1.9.24"
+    kotlinVersion = "1.8.22"
     gradleVersion = "8.10.2"
     
     // Configurações do React Native
@@ -200,7 +200,7 @@ if (project.hasProperty('org.gradle.daemon')) {
 gradle.taskGraph.whenReady { taskGraph ->
   if (taskGraph.hasTask(':app:assembleDebug') || taskGraph.hasTask(':app:assembleRelease')) {
     println "🔥 Iniciando build com Firebase nativo integrado"
-    println "📱 React Native: 0.76.7"
+    println "📱 React Native: 0.79.1"
     println "🚀 Expo SDK: 52"
     println "⚡ Kotlin: $kotlinVersion"
     println "🔧 Gradle: $gradleVersion"
